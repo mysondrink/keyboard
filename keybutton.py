@@ -24,6 +24,9 @@ class keybutton(QPushButton):
             self.pressed.emit(self.value)
         super().mousePressEvent(event)
 
+    def setValue(self, value):
+        self.value = value
+
     def onReponse(self):
         pass
 

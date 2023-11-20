@@ -32,7 +32,7 @@ def main():
     """
     mywin2 = QWidget()
     mywin2.setWindowTitle("number")
-    mywin2.resize(450,370)
+    mywin2.resize(450, 370)
     numberkeyboard = NumberKeyBoard()
     textInput2 = QLineEdit()
     textInput2.setSizePolicy(QSizePolicy.Ignored, QSizePolicy.Ignored)

@@ -160,6 +160,7 @@ class ChineseWidget(QListWidget):
         pass
 
 class MyKeyBoard(abstractkeyboard):
+    pressedChanged = Signal(int, str)
     def __init__(self):
         super().__init__()
         self.m_isChinese = False
@@ -171,6 +172,7 @@ class MyKeyBoard(abstractkeyboard):
         self.m_chineseWidget.itemClicked.connect(self.m_chineseWidget.onItemClicked)
         self.m_chineseWidget.itemClicked.connect(self.clearBufferText)
         self.m_chineseWidget.pressedChanged.connect(super().onKeyPressed)
+        self.pressedChanged.connect(super().onKeyPressed)
         self.layout = QVBoxLayout()
         self.h1 = QHBoxLayout()
         self.h2 = QHBoxLayout()
@@ -180,6 +182,10 @@ class MyKeyBoard(abstractkeyboard):
         self.h3.setSizeConstraint(QLayout.SetNoConstraint)
 
         self.pinyin = ''
+        # 1为中文,0为英文
+        self.flag_CtoE = 1
+        # 1为大写,0为小写
+        self.flag_UtoL = 0
 
         for i in range(len(list_1)):
             button = keybutton(list_1[i])
@@ -235,17 +241,35 @@ class MyKeyBoard(abstractkeyboard):
                 self.pinyin = self.pinyin[:-1]
                 self.m_chineseWidget.setText(self.pinyin)
         elif info == 'cap':
-            print(self.pinyin)
+            if self.flag_UtoL == 0:
+                button = self.findChildren(QPushButton)
+                for i in button:
+                    if len(i.value) == 1:
+                        value = i.value.upper()
+                        i.setText(value)
+                        i.setValue(value)
+                self.flag_UtoL = 1
+            else:
+                button = self.findChildren(QPushButton)
+                for i in button:
+                    if len(i.value) == 1:
+                        value = i.value.lower()
+                        i.setText(value)
+                        i.setValue(value)
+                self.flag_UtoL = 0
             return
         elif info == 'con':
-            print(self.pinyin)
+            self.setCtoE()
             return
         elif info == 'close':
             print(self.pinyin)
             return
         else:
-            self.pinyin += info
-            self.m_chineseWidget.setText(self.pinyin)
+            if self.flag_CtoE == 1:
+                self.pinyin += info
+                self.m_chineseWidget.setText(self.pinyin)
+            else:
+                self.pressedChanged.emit(-1, info)
         print(self.pinyin)
 
     def clearBufferText(self):
@@ -254,3 +278,17 @@ class MyKeyBoard(abstractkeyboard):
 
     # def onKeyPressed(self,value):
     #     print(value)
+
+    def setCtoE(self):
+        button = self.findChildren(QPushButton)
+        for i in button:
+            if i.value == 'con':
+                if self.flag_CtoE == 0:
+                    i.setText('中')
+                    self.flag_CtoE = 1
+                    break
+                else:
+                    i.setText('英')
+                    self.flag_CtoE = 0
+                    break
+
